@@ -12,7 +12,7 @@ jobs:
           username: ${GCR_DOCKER_RO_USERNAME}
           password: ${GCR_DOCKER_RO_PASSWORD}
 
-    working_directory: /root/go/src/github.com/accedian/bigmuddy-network-telemetry-pipeline
+    working_directory: /root/go/src/github.com/cisco/bigmuddy-network-telemetry-pipeline
 
     steps:
       - checkout 
@@ -34,7 +34,7 @@ jobs:
           username: ${GCR_DOCKER_RO_USERNAME}
           password: ${GCR_DOCKER_RO_PASSWORD}
 
-    working_directory: /root/go/src/github.com/accedian/bigmuddy-network-telemetry-pipeline
+          working_directory: /root/go/src/github.com/cisco/bigmuddy-network-telemetry-pipeline
     steps:
       - checkout 
       - run: 
