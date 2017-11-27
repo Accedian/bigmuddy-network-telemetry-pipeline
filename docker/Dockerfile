@@ -35,15 +35,15 @@
 #
 # ----------------------------------------------------
 
-FROM debian:stable-slim
+FROM ubuntu:xenial
 
-MAINTAINER Christian Cassar <ccassar@cisco.com>
+MAINTAINER Joel De Lamarre <jdelamarre@accedian.com>
 
 # Stage default configuration, metrics spec and example setup
 ADD pipeline.conf /data/pipeline.conf
 ADD metrics.json /data/metrics.json
 ADD metrics_gpb.json /data/metrics_gpb.json
-ADD pipeline /pipeline
+ADD bin/pipeline /pipeline
  
 
 VOLUME ["/data"]

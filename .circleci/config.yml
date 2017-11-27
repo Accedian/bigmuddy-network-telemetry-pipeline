@@ -20,10 +20,10 @@ jobs:
 
       - run:
          name: Downloading the dependencies
-         command: go get -v -t -d ./...
+         command: go get -v -t -d .
       - run:
          name: Running unit tests
-         command: go test -v ./...
+         command: go test -v .
 
       - run:
          name: Building the binaries
@@ -42,7 +42,7 @@ jobs:
  
       - run:
          name: Downloading the dependencies
-         command: go get -v -t -d ./...
+         command: go get -v -t -d .
 
       - setup_remote_docker
 
