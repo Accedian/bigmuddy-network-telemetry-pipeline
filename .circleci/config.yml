@@ -17,14 +17,6 @@ jobs:
     steps:
       - checkout 
     
-
-      - run:
-         name: Downloading the dependencies
-         command: go get -v -t -d .
-    # - run:
-    #     name: Running unit tests
-    #     command: go test -v .
-
       - run:
          name: Building the binaries
          command: make circleci-binaries
@@ -40,10 +32,6 @@ jobs:
     steps:
       - checkout 
  
-      - run:
-         name: Downloading the dependencies
-         command: go get -v -t -d .
-
       - setup_remote_docker
 
       - run:
