@@ -1,7 +1,6 @@
 package: bigmuddy-network-telemetry-pipeline
 import:
 - package: github.com/Shopify/sarama
-- package: github.com/Sirupsen/logrus
 - package: github.com/dlintw/goconf
 - package: github.com/evalphobia/logrus_fluent
 - package: github.com/golang/protobuf
@@ -30,3 +29,9 @@ import:
   - proto_go
   - proto_go/mdt_grpc_dialin
   - proto_go/mdt_grpc_dialout
+- package: github.com/sirupsen/logrus
+  version: master
+- package: github.com/Sirupsen/logrus
+  repo: git@github.com:/sirupsen/logrus
+  vcs: git
+  version: master
