@@ -31,7 +31,3 @@ import:
   - proto_go/mdt_grpc_dialout
 - package: github.com/sirupsen/logrus
   version: master
-- package: github.com/Sirupsen/logrus
-  repo: git@github.com:/sirupsen/logrus
-  vcs: git
-  version: master
