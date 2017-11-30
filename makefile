@@ -11,7 +11,7 @@ DOCKERFILE=docker/Dockerfile
 GOPATH := $(GOPATH)
 
 include skeleton/pipeline.mk
-
+  
 # Setup pretest as a prerequisite of tests.
 test: pretest
 pretest:
