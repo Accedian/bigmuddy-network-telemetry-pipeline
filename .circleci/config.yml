@@ -16,7 +16,10 @@ jobs:
 
     steps:
       - checkout 
-    
+      - run: 
+          name: Downloading the dependencies
+          command: go get -v -t -d ./...
+
       - run:
          name: Building the binaries
          command: make circleci-binaries
@@ -33,6 +36,12 @@ jobs:
       - checkout 
  
       - setup_remote_docker
+
+      - run: 
+          name: Downloading the dependencies
+          command: go get -v -t -d ./...
+
+
 
       - run:
           name: "Push image to GCR"
