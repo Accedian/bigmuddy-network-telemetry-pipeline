@@ -11,8 +11,8 @@ package main
 import (
 	"bytes"
 	"encoding/binary"
-	log "github.com/sirupsen/logrus"
 	samples "github.com/cisco/bigmuddy-network-telemetry-pipeline/mdt_msg_samples"
+	log "github.com/sirupsen/logrus"
 	"net"
 	"testing"
 	"time"

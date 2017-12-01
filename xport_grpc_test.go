@@ -10,10 +10,10 @@ package main
 
 import (
 	"fmt"
-	log "github.com/sirupsen/logrus"
 	telem "github.com/cisco/bigmuddy-network-telemetry-proto/proto_go"
 	dialin "github.com/cisco/bigmuddy-network-telemetry-proto/proto_go/mdt_grpc_dialin"
 	"github.com/golang/protobuf/proto"
+	log "github.com/sirupsen/logrus"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
