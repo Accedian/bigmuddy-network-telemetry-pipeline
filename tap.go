@@ -11,14 +11,14 @@ package main
 
 import (
 	"bufio"
-	"bytes"
 	"encoding/binary"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	log "github.com/sirupsen/logrus"
 	"os"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 )
 
 //
@@ -28,6 +28,7 @@ type tapOutputModule struct {
 	filename         string
 	countOnly        bool
 	rawDump          bool
+	printSummary     bool
 	streamSpec       *dataMsgStreamSpec
 	dataChannelDepth int
 	ctrlChan         chan *ctrlMsg
@@ -35,13 +36,15 @@ type tapOutputModule struct {
 }
 
 func tapOutputModuleNew() outputNodeModule {
-	return &tapOutputModule{}
+	return &tapOutputModule{
+		printSummary: true,
+	}
 }
 
 func (t *tapOutputModule) tapOutputFeederLoop() {
 	var stats msgStats
 	var hexOnly bool
-	//
+
 	// Period, in seconds, to dump stats if only counting.
 	const TIMEOUT = 10
 	timeout := make(chan bool, 1)
@@ -182,9 +185,13 @@ func (t *tapOutputModule) tapOutputFeederLoop() {
 			}
 			stats.MsgsOK++
 
-			w.WriteString(fmt.Sprintf(
-				"\n------- %v -------\n", time.Now()))
-			w.WriteString(fmt.Sprintf("Summary: %s\n", description))
+			fmt.Printf("TEST\n%v\n", string(b))
+
+			if t.printSummary {
+				w.WriteString(fmt.Sprintf(
+					"\n------- %v -------\n", time.Now()))
+				w.WriteString(fmt.Sprintf("Summary: %s\n", description))
+			}
 			if hexOnly || errStreamType != nil {
 				if errStreamType != nil {
 					w.WriteString(fmt.Sprintf(
@@ -192,9 +199,18 @@ func (t *tapOutputModule) tapOutputFeederLoop() {
 				}
 				w.WriteString(hex.Dump(b))
 			} else {
-				var out bytes.Buffer
-				json.Indent(&out, b, "", "    ")
-				w.WriteString(out.String())
+
+				// Joel TODO: We shouldn't force the output to be Json at this stage, let the codec decide of that
+				// if err := json.Indent(&out, b, "", "    "); err != nil {
+				// 	logctx.WithError(err).WithFields(
+				// 		log.Fields{
+				// 			"msg": err.Error(),
+				// 		}).Error("Failed to parse output json Document. Is the JSON valid? If using template, ensure the template is correct")
+
+				// 	stats.MsgsNOK++
+				// 	continue
+				// }
+				w.Write(b)
 			}
 			w.Flush()
 
@@ -282,6 +298,16 @@ func (t *tapOutputModule) configure(name string, nc nodeConfig) (
 			}).Error("'encoding' option for tap output")
 		return err, nil, nil
 	}
+
+	printSummary, err := nc.config.GetBool(name, "print_summary")
+	if err != nil && nc.config.HasOption(name, "print_summary") {
+		logger.WithError(err).WithFields(
+			log.Fields{
+				"name": name,
+			}).Error("'print_summary' option for tap output")
+		return err, nil, nil
+	}
+	t.printSummary = printSummary
 
 	//
 	// Setup control and data channels

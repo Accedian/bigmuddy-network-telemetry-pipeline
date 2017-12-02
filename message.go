@@ -101,7 +101,7 @@ var dataMsgStreamSpecDefault = &dataMsgStreamSpec{
 
 func (s *dataMsgStreamSpec) dataMsgStreamSpecTextBased() bool {
 	switch s.streamType {
-	case dMStreamJSON, dMStreamJSONEvents:
+	case dMStreamJSON, dMStreamJSONEvents, dMStreamTemplate:
 		return true
 	default:
 		return false

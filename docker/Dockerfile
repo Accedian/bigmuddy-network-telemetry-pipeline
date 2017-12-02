@@ -40,14 +40,14 @@ FROM ubuntu:xenial
 MAINTAINER Joel De Lamarre <jdelamarre@accedian.com>
 
 # Stage default configuration, metrics spec and example setup
-ADD pipeline.conf /data/pipeline.conf
-ADD metrics.json /data/metrics.json
-ADD metrics_gpb.json /data/metrics_gpb.json
+ADD pipeline.conf /conf/pipeline.conf
+ADD metrics.json /conf/metrics.json
+ADD metrics_gpb.json /conf/metrics_gpb.json
+ADD filter_test.json /conf/filter_test.json
 ADD bin/pipeline /pipeline
- 
 
 VOLUME ["/data"]
 
 WORKDIR /
 ENTRYPOINT ["/pipeline"]
-CMD ["-log=/data/pipeline.log","-config=/data/pipeline.conf"]
+CMD ["-log=/data/pipeline.log","-config=/conf/pipeline.conf"]

@@ -1,0 +1,4 @@
+timestamp,ifname,pktsout
+{{range $index,$element := .Data -}}
+{{$element.Timestamp}},{{index .Keys "interface-name"}},{{index .Content "packets-sent"}}
+{{ end -}}
