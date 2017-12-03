@@ -18,9 +18,7 @@ pretest:
 	@echo Setting up zookeeper, kafka. Docker required.
 	tools/test/run.sh
 dockerbin: .FORCE
-	echo "PATH is $(GOPATH)"
 	docker run -it --rm \
-	 	-e GOPATH=/root/go \
 	 	-v "$(GOPATH):/root/go" \
 	 	-w "/root/go/src/$(GO_REPOSITORY_PATH)" \
 	 	$(GO_SDK_IMAGE):$(GO_SDK_VERSION) make $(BIN_PATH) . 
