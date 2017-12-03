@@ -33,15 +33,9 @@ docker: dockerbin
 push: docker
 	docker push $(DOCKER_REPO_NAME)$(DOCKER_IMAGE_NAME):$(DOCKER_VER)
 
-circleci-binaries:
-	go build -o $(BIN_PATH) .
-
-circleci-push: circleci-docker
+circleci-push: docker
 	docker push $(DOCKER_REPO_NAME)$(DOCKER_IMAGE_NAME):$(DOCKER_VER)
 
-circleci-docker: circleci-binaries
-	docker build -f $(DOCKERFILE) -t $(DOCKER_REPO_NAME)$(DOCKER_IMAGE_NAME):$(DOCKER_VER) .
-	
 .FORCE: 
 clean:  
 	rm -rf bin
