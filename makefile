@@ -32,7 +32,7 @@ circleci-push: circleci-docker
 circleci-docker: circleci-binaries
 	mkdir -p docker/bin
 	cp bin/${BINARY} docker/bin/
-	docker build -t $(DOCKER_REPO_NAME)$(DOCKER_IMAGE_NAME):$(DOCKER_VER) .
+	docker build -f $(DOCKERFILE) -t $(DOCKER_REPO_NAME)$(DOCKER_IMAGE_NAME):$(DOCKER_VER) .
 
 circleci-binaries: .FORCE
 	make $(BIN_PATH) .
