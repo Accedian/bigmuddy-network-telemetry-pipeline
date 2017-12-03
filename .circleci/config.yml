@@ -15,8 +15,8 @@ jobs:
     working_directory: /root/go/src/github.com/cisco/bigmuddy-network-telemetry-pipeline
 
     steps:
-      - checkout:
-          path:  /root/go/src/github.com/cisco/bigmuddy-network-telemetry-pipeline
+      - checkout
+      
       - run: 
           name: Downloading the dependencies
           command: go get -v -t -d .
@@ -32,18 +32,16 @@ jobs:
           username: ${GCR_DOCKER_RO_USERNAME}
           password: ${GCR_DOCKER_RO_PASSWORD}
 
-          working_directory: /root/go/src/github.com/cisco/bigmuddy-network-telemetry-pipeline
+    working_directory: /root/go/src/github.com/cisco/bigmuddy-network-telemetry-pipeline
+    
     steps:
-      - checkout:
-          path:  /root/go/src/github.com/cisco/bigmuddy-network-telemetry-pipeline
- 
+      - checkout
+      
       - setup_remote_docker
 
       - run: 
           name: Downloading the dependencies
           command: go get -v -t -d .
-
-
 
       - run:
           name: "Push image to GCR"
