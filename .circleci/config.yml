@@ -15,7 +15,8 @@ jobs:
     working_directory: /root/go/src/github.com/cisco/bigmuddy-network-telemetry-pipeline
 
     steps:
-      - checkout 
+      - checkout:
+          path:  /root/go/src/github.com/cisco/bigmuddy-network-telemetry-pipeline
       - run: 
           name: Downloading the dependencies
           command: go get -v -t -d .
@@ -33,7 +34,8 @@ jobs:
 
           working_directory: /root/go/src/github.com/cisco/bigmuddy-network-telemetry-pipeline
     steps:
-      - checkout 
+      - checkout:
+          path:  /root/go/src/github.com/cisco/bigmuddy-network-telemetry-pipeline
  
       - setup_remote_docker
 
