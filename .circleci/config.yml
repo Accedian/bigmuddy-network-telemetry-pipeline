@@ -22,7 +22,7 @@ jobs:
 
       - run:
          name: Building the binaries
-         command: make circleci-binaries
+         command: go build .
 
   release:
     docker:
