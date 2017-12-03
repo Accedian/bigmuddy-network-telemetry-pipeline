@@ -1,7 +1,9 @@
 ## Current Release 
+### 0.6.0 
+**Release Date:** Sun Dec  3 01:29:15 UTC 2017     
+## Previous Releases 
 ### 0.4.0 
 **Release Date:** Sun Dec  3 01:12:56 UTC 2017     
-## Previous Releases 
 ### 0.3.0 
 **Release Date:** Sun Dec  3 00:57:56 UTC 2017     
 ### 0.2.0 
