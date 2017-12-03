@@ -8,10 +8,14 @@ GO_SDK_IMAGE := gcr.io/npav-172917/docker-go-sdk
 GO_SDK_VERSION := 0.5.0-ubuntu16
 DOCKERFILE=docker/Dockerfile
 
-GOPATH := $(GOPATH)
+ifeq ($(CIRCLECI),true)
+	GOPATH := /root/go
+endif
 
 include skeleton/pipeline.mk
-  
+
+bling:
+	echo $(GOPATH)
 # Setup pretest as a prerequisite of tests.
 test: pretest
 pretest:
@@ -30,6 +34,7 @@ docker: dockerbin
 
 push: docker
 	docker push $(DOCKER_REPO_NAME)$(DOCKER_IMAGE_NAME):$(DOCKER_VER)
+
 
 circleci-push: docker
 	docker push $(DOCKER_REPO_NAME)$(DOCKER_IMAGE_NAME):$(DOCKER_VER)
