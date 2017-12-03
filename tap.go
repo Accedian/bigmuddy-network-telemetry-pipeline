@@ -29,6 +29,7 @@ type tapOutputModule struct {
 	countOnly        bool
 	rawDump          bool
 	printSummary     bool
+	forceTextOutput  bool
 	streamSpec       *dataMsgStreamSpec
 	dataChannelDepth int
 	ctrlChan         chan *ctrlMsg
@@ -49,7 +50,7 @@ func (t *tapOutputModule) tapOutputFeederLoop() {
 	const TIMEOUT = 10
 	timeout := make(chan bool, 1)
 
-	if !t.streamSpec.dataMsgStreamSpecTextBased() {
+	if !t.streamSpec.dataMsgStreamSpecTextBased() && !t.forceTextOutput {
 		hexOnly = true
 	}
 
@@ -185,8 +186,6 @@ func (t *tapOutputModule) tapOutputFeederLoop() {
 			}
 			stats.MsgsOK++
 
-			fmt.Printf("TEST\n%v\n", string(b))
-
 			if t.printSummary {
 				w.WriteString(fmt.Sprintf(
 					"\n------- %v -------\n", time.Now()))
@@ -309,7 +308,23 @@ func (t *tapOutputModule) configure(name string, nc nodeConfig) (
 	}
 	t.printSummary = printSummary
 
-	//
+	forceTextOutput, err := nc.config.GetBool(name, "force_text_output")
+	if err != nil && nc.config.HasOption(name, "force_text_output") {
+		logger.WithError(err).WithFields(
+			log.Fields{
+				"name": name,
+			}).Error("'force_text_output' option for tap output")
+		return err, nil, nil
+	}
+	t.forceTextOutput = forceTextOutput
+
+	if t.forceTextOutput && t.rawDump {
+		logger.WithFields(
+			log.Fields{
+				"name": name,
+			}).Error("Both 'force_text_output' and 'raw' set to true in tap configuration. These options are mutually exclusive")
+	}
+
 	// Setup control and data channels
 	t.ctrlChan = make(chan *ctrlMsg)
 	t.dataChan = make(chan dataMsg, t.dataChannelDepth)

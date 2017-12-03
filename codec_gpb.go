@@ -15,17 +15,18 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	telem "github.com/cisco/bigmuddy-network-telemetry-proto/proto_go"
-	pdt "github.com/cisco/bigmuddy-network-telemetry-proto/proto_go/old/telemetry"
-	"github.com/golang/protobuf/jsonpb"
-	"github.com/golang/protobuf/proto"
-	log "github.com/sirupsen/logrus"
 	"reflect"
 	"regexp"
 	"strings"
 	"sync"
 	"sync/atomic"
 	"text/template"
+
+	telem "github.com/cisco/bigmuddy-network-telemetry-proto/proto_go"
+	pdt "github.com/cisco/bigmuddy-network-telemetry-proto/proto_go/old/telemetry"
+	"github.com/golang/protobuf/jsonpb"
+	"github.com/golang/protobuf/proto"
+	log "github.com/sirupsen/logrus"
 )
 
 const (
@@ -496,6 +497,17 @@ func (m *dataMsgGPB) produceByteStream(
 		var msg msgToFilter
 
 		msg.populateDataFromGPB(m.cachedDecode)
+
+		if log.GetLevel() == log.DebugLevel {
+			// Joel TODO: Currently only using those as debug. I am assuming the pipeline has better
+			// capabilities for instrospection...
+			fmt.Printf("\nEncoding Path:\n %v\n", msg.Encoding_path)
+			fmt.Printf("Keys:\n %v\n", msg.Data[3].Keys)
+			fmt.Printf("Content (map):\n %v\n", (*msg.Data[3].Content.(*sockDrawer)))
+			fmt.Printf("Content[\"data-rates\"]\n %v\n", (*msg.Data[3].Content.(*sockDrawer))["data-rates"])
+			fmt.Printf("Content[\"interface-statistics\"]\n %v\n", (*msg.Data[3].Content.(*sockDrawer))["interface-statistics"])
+		}
+
 		if streamSpec.context != nil {
 			parsedTemplate := streamSpec.context.(*template.Template)
 			err := parsedTemplate.Execute(&b, msg)

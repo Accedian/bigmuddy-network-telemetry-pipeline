@@ -1,0 +1,18 @@
+timestamp,systemName,ifname,inputCir && outputCir,inputAcceptMinRate,outputAcceptMinRate,inputAcceptMaxRate,outputAcceptMaxRate,inputAcceptAvgRate,outputAcceptAvgRate,inputDiscardFrames,inputAcceptOctets,outputAcceptOctets
+{{if eq .Encoding_path "Cisco-IOS-XR-pfi-im-cmd-oper:interfaces/interface-xr/interface" -}}
+{{ $nodeId := .Node_id -}}
+{{range $index,$element := .Data -}}
+{{$element.Timestamp -}},
+{{- $nodeId -}},
+{{- index .Keys "interface-name" -}},
+{{- index .Content "bandwidth" -}},
+{{- index .Content "data-rates" "input-data-rate" -}},
+{{- index .Content "data-rates" "output-data-rate" -}},
+{{- index .Content "data-rates" "peak-input-data-rate" -}},
+{{- index .Content "data-rates" "peak-output-data-rate" -}},,,
+{{- index .Content "interface-statistics" "full-interface-stats" "input-errors" -}},
+{{- index .Content "interface-statistics" "full-interface-stats" "input-drops" -}},
+{{- index .Content "interface-statistics" "full-interface-stats" "bytes-received" -}},
+{{- index .Content "interface-statistics" "full-interface-stats" "bytes-sent" }}
+{{ end -}}
+{{ end -}}
