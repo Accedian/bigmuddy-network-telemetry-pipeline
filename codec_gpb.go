@@ -514,6 +514,7 @@ func (m *dataMsgGPB) generatePMFileName(templateStr string) (string, error) {
 		SourceId: srcIp,
 	}
 
+	
 	t, err := template.New("PMFiles").Parse(templateStr)
 	if err != nil {
 		return "", fmt.Errorf("Failed to parse 'pm_file_template' value '%s': %s", templateStr, err.Error())

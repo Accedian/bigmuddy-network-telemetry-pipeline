@@ -44,7 +44,7 @@ func tapOutputModuleNew() outputNodeModule {
 	}
 }
 
-func (t *tapOutputModule) MustGeneratePMFile() bool {
+func (t *tapOutputModule) SplitPMFiles() bool {
 	return t.pm_file_template != ""
 }
 
@@ -77,6 +77,9 @@ func (t *tapOutputModule) tapOutputFeederLoop() {
 	}
 	defer f.Close()
 
+	outWriter := bufio.NewWriter(f)
+	defer outWriter.Flush()
+
 	logctx.Info("Starting up tap")
 
 	if t.countOnly {
@@ -86,186 +89,195 @@ func (t *tapOutputModule) tapOutputFeederLoop() {
 		}()
 	}
 
-	w := bufio.NewWriter(f)
-
 	for {
-		select {
 
-		case <-timeout:
+		func() {
 
-			go func() {
-				time.Sleep(TIMEOUT * time.Second)
-				timeout <- true
-			}()
-			w.WriteString(fmt.Sprintf(
-				"%s:%s: rxed msgs: %v\n",
-				t.name, time.Now().Local(), stats.MsgsOK))
-			w.Flush()
+			w := outWriter
 
-		case msg, ok := <-t.dataChan:
+			select {
 
-			if !ok {
-				// Channel has been closed. Our demise
-				// is near. SHUTDOWN is likely to be
-				t.dataChan = nil
-				continue
-			}
+			case <-timeout:
 
-			if t.countOnly {
-				stats.MsgsOK++
-				continue
-			}
-
-			dM := msg
-			description := dM.getDataMsgDescription()
-
-			// If we must generate a new PM per data message, lets create the file there
-			if t.MustGeneratePMFile() {
-				pmFileName, err := msg.generatePMFileName(t.pm_file_template)
-				if err != nil {
-					logctx.WithError(err).WithFields(
-						log.Fields{
-							"msg": description,
-						}).Error("Failed to generate PM file name")
-					continue
-				}
-				if conductor.Debug {
-					fmt.Printf("Creating PM file %s\n", pmFileName)
-				}
-			}
-
-			if t.rawDump {
-				err, b := dM.produceByteStream(dataMsgStreamSpecDefault)
-				if err != nil {
-					logctx.WithError(err).WithFields(
-						log.Fields{
-							"msg": description,
-						}).Error("Tap failed to produce raw message")
-					continue
-				}
-				err, enc := dataMsgStreamTypeToEncoding(
-					dM.getDataMsgStreamType())
-				if err != nil {
-					logctx.WithError(err).WithFields(
-						log.Fields{
-							"msg": description,
-						}).Error("Tap failed to identify encoding")
-					continue
-				}
-				err, encst := encapSTFromEncoding(enc)
-				if err != nil {
-					logctx.WithError(err).WithFields(
-						log.Fields{
-							"msg": description,
-						}).Error("Tap failed to identify encap st")
-					continue
-				}
-
-				//
-				// We should really push this into co side of codec.
-				hdr := encapSTHdr{
-					MsgType:       ENC_ST_HDR_MSG_TYPE_TELEMETRY_DATA,
-					MsgEncap:      encst,
-					MsgHdrVersion: ENC_ST_HDR_VERSION,
-					Msgflag:       ENC_ST_HDR_MSG_FLAGS_NONE,
-					Msglen:        uint32(len(b)),
-				}
-				err = binary.Write(w, binary.BigEndian, hdr)
-				if err != nil {
-					logctx.WithError(err).WithFields(
-						log.Fields{
-							"msg": description,
-						}).Errorf("Tap failed to write binary hdr %+v", hdr)
-					continue
-				}
-
-				_, err = w.Write(b)
-				if err != nil {
-					logctx.WithError(err).WithFields(
-						log.Fields{
-							"msg": description,
-						}).Error("Tap failed to write binary message")
-					continue
-				}
-
-				continue
-			}
-
-			// OK. We're ready to dump something largely human readable.
-			errStreamType, b := dM.produceByteStream(t.streamSpec)
-			if errStreamType != nil {
-				err, b = dM.produceByteStream(dataMsgStreamSpecDefault)
-				if err != nil {
-					logctx.WithError(err).WithFields(
-						log.Fields{
-							"msg": description,
-						}).Error("Tap failed to dump message")
-					stats.MsgsNOK++
-					continue
-				}
-			} else if b == nil {
-				continue
-			}
-			stats.MsgsOK++
-
-			if t.printSummary {
+				go func() {
+					time.Sleep(TIMEOUT * time.Second)
+					timeout <- true
+				}()
 				w.WriteString(fmt.Sprintf(
-					"\n------- %v -------\n", time.Now()))
-				w.WriteString(fmt.Sprintf("Summary: %s\n", description))
-			}
-			if hexOnly || errStreamType != nil {
-				if errStreamType != nil {
-					w.WriteString(fmt.Sprintf(
-						"Requested stream type failed: [%v]\n", errStreamType))
-				}
-				w.WriteString(hex.Dump(b))
-			} else {
-
-				// Joel TODO: We shouldn't force the output to be Json at this stage, let the codec decide of that
-				// if err := json.Indent(&out, b, "", "    "); err != nil {
-				// 	logctx.WithError(err).WithFields(
-				// 		log.Fields{
-				// 			"msg": err.Error(),
-				// 		}).Error("Failed to parse output json Document. Is the JSON valid? If using template, ensure the template is correct")
-
-				// 	stats.MsgsNOK++
-				// 	continue
-				// }
-				w.Write(b)
-			}
-			w.Flush()
-
-		case msg := <-t.ctrlChan:
-			switch msg.id {
-			case REPORT:
-				content, _ := json.Marshal(stats)
-				resp := &ctrlMsg{
-					id:       ACK,
-					content:  content,
-					respChan: nil,
-				}
-				msg.respChan <- resp
-
-			case SHUTDOWN:
-
+					"%s:%s: rxed msgs: %v\n",
+					t.name, time.Now().Local(), stats.MsgsOK))
 				w.Flush()
-				logctx.Info("tap feeder loop, rxed SHUTDOWN")
 
-				//
-				// Dump detailed stats here
+			case msg, ok := <-t.dataChan:
 
-				resp := &ctrlMsg{
-					id:       ACK,
-					respChan: nil,
+				if !ok {
+					// Channel has been closed. Our demise
+					// is near. SHUTDOWN is likely to be
+					t.dataChan = nil
+					break
 				}
-				msg.respChan <- resp
-				return
 
-			default:
-				logctx.Error("tap feeder loop, unknown ctrl message")
+				if t.countOnly {
+					stats.MsgsOK++
+					break
+				}
+
+				dM := msg
+				description := dM.getDataMsgDescription()
+
+				if t.rawDump {
+					err, b := dM.produceByteStream(dataMsgStreamSpecDefault)
+					if err != nil {
+						logctx.WithError(err).WithFields(
+							log.Fields{
+								"msg": description,
+							}).Error("Tap failed to produce raw message")
+						break
+					}
+					err, enc := dataMsgStreamTypeToEncoding(
+						dM.getDataMsgStreamType())
+					if err != nil {
+						logctx.WithError(err).WithFields(
+							log.Fields{
+								"msg": description,
+							}).Error("Tap failed to identify encoding")
+						break
+					}
+					err, encst := encapSTFromEncoding(enc)
+					if err != nil {
+						logctx.WithError(err).WithFields(
+							log.Fields{
+								"msg": description,
+							}).Error("Tap failed to identify encap st")
+						break
+					}
+
+					//
+					// We should really push this into co side of codec.
+					hdr := encapSTHdr{
+						MsgType:       ENC_ST_HDR_MSG_TYPE_TELEMETRY_DATA,
+						MsgEncap:      encst,
+						MsgHdrVersion: ENC_ST_HDR_VERSION,
+						Msgflag:       ENC_ST_HDR_MSG_FLAGS_NONE,
+						Msglen:        uint32(len(b)),
+					}
+					err = binary.Write(w, binary.BigEndian, hdr)
+					if err != nil {
+						logctx.WithError(err).WithFields(
+							log.Fields{
+								"msg": description,
+							}).Errorf("Tap failed to write binary hdr %+v", hdr)
+						break
+					}
+
+					_, err = w.Write(b)
+					if err != nil {
+						logctx.WithError(err).WithFields(
+							log.Fields{
+								"msg": description,
+							}).Error("Tap failed to write binary message")
+						break
+					}
+
+					break
+				}
+
+				// OK. We're ready to dump something largely human readable.
+				errStreamType, b := dM.produceByteStream(t.streamSpec)
+				if errStreamType != nil {
+					err, b = dM.produceByteStream(dataMsgStreamSpecDefault)
+					if err != nil {
+						logctx.WithError(err).WithFields(
+							log.Fields{
+								"msg": description,
+							}).Error("Tap failed to dump message")
+						stats.MsgsNOK++
+						break
+					}
+				} else if b == nil {
+					break
+				}
+				stats.MsgsOK++
+
+				// If we must generate a new PM file per data message, lets create the file there
+				if t.SplitPMFiles() {
+					pmFileName, err := msg.generatePMFileName(t.pm_file_template)
+					if err != nil {
+						logctx.WithError(err).WithFields(
+							log.Fields{
+								"msg": description,
+							}).Error("Failed to generate PM file name")
+						break
+					}
+					if conductor.Debug {
+						fmt.Printf("Creating PM file %s\n", pmFileName)
+					}
+
+					// Prepare dump file for writing
+					pmFile, err := os.OpenFile(pmFileName, os.O_WRONLY|os.O_CREATE|os.O_APPEND,
+						0660)
+
+					if err != nil {
+						logctx.WithError(err).Error("Tap failed to open dump file")
+						return
+					}
+
+					defer func() {
+						pmFile.Close()
+					}()
+
+					w = bufio.NewWriter(pmFile)
+				}
+
+				if t.printSummary {
+					w.WriteString(fmt.Sprintf(
+						"\n------- %v -------\n", time.Now()))
+					w.WriteString(fmt.Sprintf("Summary: %s\n", description))
+				}
+				if hexOnly || errStreamType != nil {
+					if errStreamType != nil {
+						w.WriteString(fmt.Sprintf(
+							"Requested stream type failed: [%v]\n", errStreamType))
+					}
+					w.WriteString(hex.Dump(b))
+				} else {
+
+					// Everything is clean, lets dump the record
+					w.Write(b)
+				}
+				w.Flush()
+
+			case msg := <-t.ctrlChan:
+				switch msg.id {
+				case REPORT:
+					content, _ := json.Marshal(stats)
+					resp := &ctrlMsg{
+						id:       ACK,
+						content:  content,
+						respChan: nil,
+					}
+					msg.respChan <- resp
+
+				case SHUTDOWN:
+
+					w.Flush()
+					logctx.Info("tap feeder loop, rxed SHUTDOWN")
+
+					//
+					// Dump detailed stats here
+
+					resp := &ctrlMsg{
+						id:       ACK,
+						respChan: nil,
+					}
+					msg.respChan <- resp
+					return
+
+				default:
+					logctx.Error("tap feeder loop, unknown ctrl message")
+				}
 			}
-		}
-
+		}()
 	}
 }
 
