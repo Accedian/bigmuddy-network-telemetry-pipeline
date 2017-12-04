@@ -1,3 +1,6 @@
+### Added
+* feature - added InputAcceptDataRate and OutputAcceptDataRate to the colt csv template
+
 ## Current Release 
 ### 0.14.0 
 **Release Date:** Mon Dec  4 17:47:34 UTC 2017     
