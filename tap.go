@@ -382,6 +382,6 @@ func (t *tapOutputModule) configure(name string, nc nodeConfig) (
 // A hacky function to replace ${...} in variable names, escaping the templating applied on
 // configuration file
 func convertStrVarToTemplArgs(varStr string) string {
-	vOpen := strings.Replace(varStr, "${", "{{ .", -1)
-	return strings.Replace(vOpen, "}", " }}", -1)
+	vOpen := strings.Replace(varStr, "$(", "{{ .", -1)
+	return strings.Replace(vOpen, ")", " }}", -1)
 }
