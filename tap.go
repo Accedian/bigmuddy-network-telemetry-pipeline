@@ -16,6 +16,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	log "github.com/sirupsen/logrus"
@@ -29,6 +30,7 @@ type tapOutputModule struct {
 	countOnly        bool
 	rawDump          bool
 	printSummary     bool
+	pm_file_template string
 	forceTextOutput  bool
 	streamSpec       *dataMsgStreamSpec
 	dataChannelDepth int
@@ -40,6 +42,10 @@ func tapOutputModuleNew() outputNodeModule {
 	return &tapOutputModule{
 		printSummary: true,
 	}
+}
+
+func (t *tapOutputModule) MustGeneratePMFile() bool {
+	return t.pm_file_template != ""
 }
 
 func (t *tapOutputModule) tapOutputFeederLoop() {
@@ -112,6 +118,22 @@ func (t *tapOutputModule) tapOutputFeederLoop() {
 
 			dM := msg
 			description := dM.getDataMsgDescription()
+
+			// If we must generate a new PM per data message, lets create the file there
+			if t.MustGeneratePMFile() {
+				pmFileName, err := msg.generatePMFileName(t.pm_file_template)
+				if err != nil {
+					logctx.WithError(err).WithFields(
+						log.Fields{
+							"msg": description,
+						}).Error("Failed to generate PM file name")
+					continue
+				}
+				if conductor.Debug {
+					fmt.Printf("Creating PM file %s\n", pmFileName)
+				}
+			}
+
 			if t.rawDump {
 				err, b := dM.produceByteStream(dataMsgStreamSpecDefault)
 				if err != nil {
@@ -308,6 +330,16 @@ func (t *tapOutputModule) configure(name string, nc nodeConfig) (
 	}
 	t.printSummary = printSummary
 
+	pm_file_template, err := nc.config.GetString(name, "pm_file_template")
+	if err != nil && nc.config.HasOption(name, "pm_file_template") {
+		logger.WithError(err).WithFields(
+			log.Fields{
+				"name": name,
+			}).Error("'pm_file_template' option for tap output")
+		return err, nil, nil
+	}
+	t.pm_file_template = convertStrVarToTemplArgs(pm_file_template)
+
 	forceTextOutput, err := nc.config.GetBool(name, "force_text_output")
 	if err != nil && nc.config.HasOption(name, "force_text_output") {
 		logger.WithError(err).WithFields(
@@ -333,4 +365,11 @@ func (t *tapOutputModule) configure(name string, nc nodeConfig) (
 
 	return nil, t.dataChan, t.ctrlChan
 
+}
+
+// A hacky function to replace ${...} in variable names, escaping the templating applied on
+// configuration file
+func convertStrVarToTemplArgs(varStr string) string {
+	vOpen := strings.Replace(varStr, "${", "{{ .", -1)
+	return strings.Replace(vOpen, "}", " }}", -1)
 }

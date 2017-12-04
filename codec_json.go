@@ -71,6 +71,10 @@ func (m *dataMsgJSON) getMetaData() *dataMsgMetaData {
 	}
 }
 
+func (m *dataMsgJSON) generatePMFileName(template string) (string, error) {
+	return "", fmt.Errorf("'pm_file_template' option is unimplemented for CODEC json")
+}
+
 type codecJSON struct {
 	name string
 }

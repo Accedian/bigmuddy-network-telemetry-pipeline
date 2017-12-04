@@ -15,6 +15,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"net"
 	"reflect"
 	"regexp"
 	"strings"
@@ -298,6 +299,13 @@ type msgToSerialise struct {
 	Rows      []*rowToSerialise `json:"Rows,omitempty"`
 }
 
+// A structure used in template substitutions
+type MsgData struct {
+	Metadata *dataMsgMetaData
+	Message  *msgToFilter
+	SourceId string
+}
+
 //
 // Produce byte stream from GPB K/V encoded content in preparation for
 // JSON events.  Eventually, we should cache the decoded content to
@@ -479,7 +487,66 @@ func codecGPBJSONifyDataGPB(
 	}
 }
 
-//
+var pmFileCounterMap = struct {
+	sync.Mutex
+	m map[string]uint64
+}{m: make(map[string]uint64)}
+
+func (m *dataMsgGPB) generatePMFileName(templateStr string) (string, error) {
+	var msg msgToFilter
+	msg.populateDataFromGPB(m.cachedDecode)
+
+	err, srcId := m.getMetaDataIdentifier()
+	if err != nil {
+		srcId = "No_Identifier"
+	}
+
+	// If the srcId is a host:port, use the host part for source Id
+	srcIp, _, err := net.SplitHostPort(srcId)
+	if err != nil {
+		// source identifier is not ip:port. Just use the full string for source Id
+		// in this case
+		srcIp = srcId
+	}
+	tData := &MsgData{
+		Metadata: m.getMetaData(),
+		Message:  &msg,
+		SourceId: srcIp,
+	}
+
+	t, err := template.New("PMFiles").Parse(templateStr)
+	if err != nil {
+		return "", fmt.Errorf("Failed to parse 'pm_file_template' value '%s': %s", templateStr, err.Error())
+	}
+	var b bytes.Buffer
+	err = t.Execute(&b, tData)
+
+	if err != nil {
+		return "", fmt.Errorf("Failed to substitude values in 'pm_file_template': %s", err.Error())
+	}
+
+	pmFilename := b.String()
+
+	// If the special key $COUNTER is provided in the template name,
+	// we will want to replace it with a monotonic counter that is increased everytime
+	// a message for teh pmFilename is received
+	if strings.Contains(pmFilename, "$COUNTER") {
+		pmFileCounterMap.Lock()
+		counter, ok := pmFileCounterMap.m[templateStr]
+		if !ok {
+			counter = uint64(0)
+		} else {
+			counter++
+		}
+		pmFileCounterMap.m[templateStr] = counter
+
+		pmFileCounterMap.Unlock()
+
+		pmFilename = strings.Replace(pmFilename, "$COUNTER", fmt.Sprintf("%d", counter), -1)
+	}
+	return pmFilename, err
+}
+
 // This function is capable of producing streams for GPB (passed
 //through from input), JSON and JSON events from GPB. GPB in this
 //context means GPB K/V or compact encoded using the common header.
@@ -498,14 +565,16 @@ func (m *dataMsgGPB) produceByteStream(
 
 		msg.populateDataFromGPB(m.cachedDecode)
 
-		if log.GetLevel() == log.DebugLevel {
+		if conductor.Debug {
+
+			_, id := m.getMetaDataIdentifier()
 			// Joel TODO: Currently only using those as debug. I am assuming the pipeline has better
 			// capabilities for instrospection...
-			fmt.Printf("\nEncoding Path:\n %v\n", msg.Encoding_path)
-			fmt.Printf("Keys:\n %v\n", msg.Data[3].Keys)
-			fmt.Printf("Content (map):\n %v\n", (*msg.Data[3].Content.(*sockDrawer)))
-			fmt.Printf("Content[\"data-rates\"]\n %v\n", (*msg.Data[3].Content.(*sockDrawer))["data-rates"])
-			fmt.Printf("Content[\"interface-statistics\"]\n %v\n", (*msg.Data[3].Content.(*sockDrawer))["interface-statistics"])
+			fmt.Printf("\nEncoding Path: %v\nIdentifier: %v\nKeys: %v\nContent (map): %v\nContent[\"data-rates\"]: %v\nContent[\"interface-statistics\"]: %v",
+				msg.Encoding_path,
+				id,
+				msg.Data[0].Keys, (*msg.Data[0].Content.(*sockDrawer)),
+				(*msg.Data[0].Content.(*sockDrawer))["data-rates"], (*msg.Data[3].Content.(*sockDrawer))["interface-statistics"])
 		}
 
 		if streamSpec.context != nil {

@@ -182,6 +182,7 @@ type dataMsg interface {
 	getMetaDataPath() (error, string)
 	getMetaDataIdentifier() (error, string)
 	getMetaData() *dataMsgMetaData
+	generatePMFileName(filenameTemplate string) (string, error)
 }
 
 //
