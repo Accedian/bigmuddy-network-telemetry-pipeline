@@ -514,7 +514,6 @@ func (m *dataMsgGPB) generatePMFileName(templateStr string) (string, error) {
 		SourceId: srcIp,
 	}
 
-	
 	t, err := template.New("PMFiles").Parse(templateStr)
 	if err != nil {
 		return "", fmt.Errorf("Failed to parse 'pm_file_template' value '%s': %s", templateStr, err.Error())
@@ -571,7 +570,7 @@ func (m *dataMsgGPB) produceByteStream(
 			_, id := m.getMetaDataIdentifier()
 			// Joel TODO: Currently only using those as debug. I am assuming the pipeline has better
 			// capabilities for instrospection...
-			fmt.Printf("\nEncoding Path: %v\nIdentifier: %v\nKeys: %v\nContent (map): %v\nContent[\"data-rates\"]: %v\nContent[\"interface-statistics\"]: %v",
+			fmt.Printf("\n-------------\nEncoding Path: %v\nIdentifier: %v\nKeys: %v\nContent (map): %v\nContent[\"data-rates\"]: %v\nContent[\"interface-statistics\"]: %v\n\n",
 				msg.Encoding_path,
 				id,
 				msg.Data[0].Keys, (*msg.Data[0].Content.(*sockDrawer)),
