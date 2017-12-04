@@ -2,18 +2,18 @@
 timestamp,systemName,serviceName,serviceIndex,firmwareVersion,manufacturerName,modelName,inputUtilValid,inputCir,inputEir,inputCbs,inputEbs,inputAcceptMinRate,inputAcceptMaxRate,inputAcceptAvgRate,inputAcceptFrames,inputAcceptOctets,inputDiscardMinRate,inputDiscardMaxRate,inputDiscardAvgRate,inputDiscardFrames,inputDiscardOctets,outputUtilValid,outputCir,outputEir,outputCbs,outputEbs,outputAcceptMinRate,outputAcceptMaxRate,outputAcceptAvgRate,outputAcceptFrames,outputAcceptOctets,outputDiscardMinRate,outputDiscardMaxRate,outputDiscardAvgRate,outputDiscardFrames,outputDiscardOctets
 {{ $nodeId := .Node_id -}}
 {{range $index,$element := .Data -}}
-{{$element.Timestamp -}},
+{{ .ConvertMillisEpocToSecEpoc $element.Timestamp -}},
 {{- $nodeId -}},
-{{- index .Keys "interface-name" -}},0,0,0,0,0,
-{{- index .Content "bandwidth" -}},0,0,0,
+{{- index .Keys "interface-name" -}},,,,,true,
+{{- index .Content "bandwidth" -}},,,,
 {{- index .Content "data-rates" "input-data-rate" -}},
-{{- index .Content "data-rates" "peak-input-data-rate" -}},0,0,
-{{- index .Content "interface-statistics" "full-interface-stats" "bytes-received" -}},0,0,0,
+{{- index .Content "data-rates" "peak-input-data-rate" -}},,,
+{{- index .Content "interface-statistics" "full-interface-stats" "bytes-received" -}},,,,
 {{- index .Content "interface-statistics" "full-interface-stats" "input-errors" -}},
-{{- index .Content "interface-statistics" "full-interface-stats" "input-drops" -}},0,
-{{- index .Content "bandwidth" -}},0,0,0,
+{{- index .Content "interface-statistics" "full-interface-stats" "input-drops" -}},true,
+{{- index .Content "bandwidth" -}},,,,
 {{- index .Content "data-rates" "output-data-rate" -}},
-{{- index .Content "data-rates" "peak-output-data-rate" -}},0,0,
-{{- index .Content "interface-statistics" "full-interface-stats" "bytes-sent" }},0,0,0,0,
+{{- index .Content "data-rates" "peak-output-data-rate" -}},,,
+{{- index .Content "interface-statistics" "full-interface-stats" "bytes-sent" }},,,,,,
 {{ end -}}
 {{ end -}}

@@ -547,6 +547,12 @@ func (m *dataMsgGPB) generatePMFileName(templateStr string) (string, error) {
 	return pmFilename, err
 }
 
+func (m *rowToFilter) ConvertMillisEpocToSecEpoc(epochMillis uint64) uint32 {
+
+	return uint32(epochMillis / uint64(1000))
+
+}
+
 // This function is capable of producing streams for GPB (passed
 //through from input), JSON and JSON events from GPB. GPB in this
 //context means GPB K/V or compact encoded using the common header.
