@@ -7,9 +7,6 @@ BINARY=pipeline
 BIN_PATH := bin/${BINARY}
 DOCKERFILE=docker/Dockerfile
 
-
-
-
 include skeleton/pipeline.mk
 
 dockerbin:
