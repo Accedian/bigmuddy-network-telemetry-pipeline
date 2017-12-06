@@ -11,10 +11,11 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/dlintw/goconf"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/dlintw/goconf"
 )
 
 var kmod kafkaOutputModule
@@ -54,6 +55,10 @@ func (m *dataMsgKafkaTest) getMetaData() *dataMsgMetaData {
 		Path:       "RootOperKafkaTest",
 		Identifier: "RouterInSpace",
 	}
+}
+
+func (m *dataMsgKafkaTest) generatePMFileName(templateStr string) (string, error) {
+	return "", nil
 }
 
 func (m *dataMsgKafkaTest) produceMetrics(

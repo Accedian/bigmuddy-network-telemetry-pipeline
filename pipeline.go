@@ -23,11 +23,6 @@ import (
 	"bytes"
 	"flag"
 	"fmt"
-	telem "github.com/cisco/bigmuddy-network-telemetry-proto/proto_go"
-	"github.com/dlintw/goconf"
-	"github.com/evalphobia/logrus_fluent"
-	"github.com/prometheus/client_golang/prometheus"
-	log "github.com/sirupsen/logrus"
 	"io/ioutil"
 	"os"
 	"os/signal"
@@ -37,6 +32,12 @@ import (
 	"syscall"
 	"text/template"
 	"time"
+
+	telem "github.com/cisco/bigmuddy-network-telemetry-proto/proto_go"
+	"github.com/dlintw/goconf"
+	"github.com/evalphobia/logrus_fluent"
+	"github.com/prometheus/client_golang/prometheus"
+	log "github.com/sirupsen/logrus"
 )
 
 var theLogger = log.New()
