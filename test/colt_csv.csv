@@ -6,16 +6,35 @@ timestamp,systemName,serviceName,serviceIndex,firmwareVersion,manufacturerName,m
 {{- $nodeId -}},
 {{- index .Keys "interface-name" -}},,,,,true,
 {{- index .Content "bandwidth" -}},,,,
+{{- if  eq ( index .Content "interface-type" )  ( "IFT_VLAN_SUBIF" ) -}}
+{{- if index .Content "data-rates" -}}
 {{- index .Content "data-rates" "input-data-rate" -}},
 {{- index .Content "data-rates" "peak-input-data-rate" -}},
 {{- index .Content "data-rates" "input-data-rate" -}},,
-{{- index .Content "interface-statistics" "full-interface-stats" "bytes-received" -}},,,,
-{{- index .Content "interface-statistics" "full-interface-stats" "input-errors" -}},
-{{- index .Content "interface-statistics" "full-interface-stats" "input-drops" -}},true,
+{{- else -}}
+,,,,
+{{- end -}}
+{{- if and (index .Content "interface-statistics") (index .Content "interface-statistics" "basic-interface-stats") -}}
+{{- index .Content "interface-statistics" "basic-interface-stats" "bytes-received" -}},,,,
+{{- index .Content "interface-statistics" "basic-interface-stats" "input-errors" -}},
+{{- index .Content "interface-statistics" "basic-interface-stats" "input-drops" -}},true,
+{{- else -}}
+,,,,,,true,
+{{- end -}}
 {{- index .Content "bandwidth" -}},,,,
+{{- if index .Content "data-rates" -}}
 {{- index .Content "data-rates" "output-data-rate" -}},
 {{- index .Content "data-rates" "peak-output-data-rate" -}},
 {{- index .Content "data-rates" "output-data-rate" -}},,
-{{- index .Content "interface-statistics" "full-interface-stats" "bytes-sent" }},,,,,,
+{{- else -}}
+,,,,
+{{- end -}}
+{{- if and (index .Content "interface-statistics") (index .Content "interface-statistics" "basic-interface-stats") -}}
+{{- index .Content "interface-statistics" "basic-interface-stats" "bytes-sent" }},,,,,,
+{{- else -}}
+,,,,,,,
+{{- end -}}
+{{- else -}}
+{{ end }}
 {{ end -}}
 {{ end -}}
