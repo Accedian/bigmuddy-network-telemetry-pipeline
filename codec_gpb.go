@@ -25,6 +25,7 @@ import (
 
 	telem "github.com/cisco/bigmuddy-network-telemetry-proto/proto_go"
 	pdt "github.com/cisco/bigmuddy-network-telemetry-proto/proto_go/old/telemetry"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/proto"
 	log "github.com/sirupsen/logrus"
@@ -576,11 +577,12 @@ func (m *dataMsgGPB) produceByteStream(
 			_, id := m.getMetaDataIdentifier()
 			// Joel TODO: Currently only using those as debug. I am assuming the pipeline has better
 			// capabilities for instrospection...
-			fmt.Printf("\n-------------\nEncoding Path: %v\nIdentifier: %v\nKeys: %v\nContent (map): %v\nContent[\"data-rates\"]: %v\nContent[\"interface-statistics\"]: %v\n\n",
+			fmt.Printf("\n-------------\nEncoding Path: %v\nIdentifier: %v\nKeys: %v\n\n",
 				msg.Encoding_path,
 				id,
-				msg.Data[0].Keys, (*msg.Data[0].Content.(*sockDrawer)),
-				(*msg.Data[0].Content.(*sockDrawer))["data-rates"], (*msg.Data[3].Content.(*sockDrawer))["interface-statistics"])
+				msg.Data[0].Keys)
+
+			spew.Dump(msg.Data[0])
 		}
 
 		if streamSpec.context != nil {

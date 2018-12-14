@@ -2,39 +2,35 @@
 timestamp,systemName,serviceName,serviceIndex,firmwareVersion,manufacturerName,modelName,inputUtilValid,inputCir,inputEir,inputCbs,inputEbs,inputAcceptMinRate,inputAcceptMaxRate,inputAcceptAvgRate,inputAcceptFrames,inputAcceptOctets,inputDiscardMinRate,inputDiscardMaxRate,inputDiscardAvgRate,inputDiscardFrames,inputDiscardOctets,outputUtilValid,outputCir,outputEir,outputCbs,outputEbs,outputAcceptMinRate,outputAcceptMaxRate,outputAcceptAvgRate,outputAcceptFrames,outputAcceptOctets,outputDiscardMinRate,outputDiscardMaxRate,outputDiscardAvgRate,outputDiscardFrames,outputDiscardOctets
 {{ $nodeId := .Node_id -}}
 {{range $index,$element := .Data -}}
-{{ .ConvertMillisEpocToSecEpoc $element.Timestamp -}},
+{{- /* skip any rows that don't have interface-statistics or data-rates */ -}}
+{{- if and (index .Content "data-rates") (index .Content "interface-statistics") -}}
+{{- if or (index .Content "interface-statistics" "basic-interface-stats") (index .Content "interface-statistics" "full-interface-stats") -}}
+{{- .ConvertMillisEpocToSecEpoc $element.Timestamp -}},
 {{- $nodeId -}},
 {{- index .Keys "interface-name" -}},,,,,true,
 {{- index .Content "bandwidth" -}},,,,
-{{- if  eq ( index .Content "interface-type" )  ( "IFT_VLAN_SUBIF" ) -}}
-{{- if index .Content "data-rates" -}}
-{{- index .Content "data-rates" "input-data-rate" -}},
+{{- index $element.Content "data-rates" "input-data-rate" -}},
 {{- index .Content "data-rates" "peak-input-data-rate" -}},
 {{- index .Content "data-rates" "input-data-rate" -}},,
-{{- else -}}
-,,,,
-{{- end -}}
-{{- if and (index .Content "interface-statistics") (index .Content "interface-statistics" "basic-interface-stats") -}}
+{{- if (index .Content "interface-statistics" "basic-interface-stats") -}}
 {{- index .Content "interface-statistics" "basic-interface-stats" "bytes-received" -}},,,,
 {{- index .Content "interface-statistics" "basic-interface-stats" "input-errors" -}},
 {{- index .Content "interface-statistics" "basic-interface-stats" "input-drops" -}},true,
 {{- else -}}
-,,,,,,true,
+{{- index .Content "interface-statistics" "full-interface-stats" "bytes-received" -}},,,,
+{{- index .Content "interface-statistics" "full-interface-stats" "input-errors" -}},
+{{- index .Content "interface-statistics" "full-interface-stats" "input-drops" -}},true,
 {{- end -}}
 {{- index .Content "bandwidth" -}},,,,
-{{- if index .Content "data-rates" -}}
 {{- index .Content "data-rates" "output-data-rate" -}},
 {{- index .Content "data-rates" "peak-output-data-rate" -}},
 {{- index .Content "data-rates" "output-data-rate" -}},,
-{{- else -}}
-,,,,
-{{- end -}}
-{{- if and (index .Content "interface-statistics") (index .Content "interface-statistics" "basic-interface-stats") -}}
+{{- if (index .Content "interface-statistics" "basic-interface-stats") -}}
 {{- index .Content "interface-statistics" "basic-interface-stats" "bytes-sent" }},,,,,,
 {{- else -}}
-,,,,,,,
-{{- end -}}
-{{- else -}}
-{{ end }}
+{{- index .Content "interface-statistics" "full-interface-stats" "bytes-sent" }},,,,,,
+{{- end }}
+{{ end -}}
+{{ end -}}
 {{ end -}}
 {{ end -}}
