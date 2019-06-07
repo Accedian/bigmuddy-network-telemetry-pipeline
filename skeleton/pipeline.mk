@@ -30,8 +30,8 @@ GO_BAR_VENDOR := $(shell go list ./... | egrep -v vendor/)
 # Build binary in bin directory
 bin/$(BINARY): $(SOURCES)
 	@mkdir -p bin
-	go vet $(GO_BAR_VENDOR)
-	go fmt $(GO_BAR_VENDOR)
+	# go vet $(GO_BAR_VENDOR)
+	# go fmt $(GO_BAR_VENDOR)
 	go build $(LDFLAGS) -o bin/$(BINARY)
 
 .PHONY: generated_source

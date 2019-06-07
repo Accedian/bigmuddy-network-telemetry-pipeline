@@ -10,6 +10,11 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
+	"net"
+	"testing"
+	"time"
+
 	telem "github.com/cisco/bigmuddy-network-telemetry-proto/proto_go"
 	dialin "github.com/cisco/bigmuddy-network-telemetry-proto/proto_go/mdt_grpc_dialin"
 	"github.com/golang/protobuf/proto"
@@ -17,10 +22,6 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
-	"math/rand"
-	"net"
-	"testing"
-	"time"
 )
 
 type grpcTestUserPasswordCollector struct {
@@ -112,7 +113,7 @@ func TestGRPCRun(t *testing.T) {
 	}
 	log.Debug("       END       ==============================================")
 
-	log.Debug("GRPCTEST: exited datachannel after %d events\n", i)
+	log.Debugf("GRPCTEST: exited datachannel after %d events\n", i)
 	respChan := make(chan *ctrlMsg)
 	request := &ctrlMsg{
 		id:       SHUTDOWN,

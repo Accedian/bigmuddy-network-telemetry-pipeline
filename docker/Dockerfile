@@ -39,6 +39,7 @@ FROM ubuntu:xenial
 
 MAINTAINER Joel De Lamarre <jdelamarre@accedian.com>
 
+RUN apt-get update && apt-get -y install vim && apt-get clean
 # Stage default configuration, metrics spec and example setup
 ADD pipeline.conf /conf/pipeline.conf
 ADD metrics.json /conf/metrics.json
