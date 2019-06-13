@@ -285,7 +285,7 @@ func (s *grpcRemoteServer) RequireTransportSecurity() bool {
 func (server *grpcRemoteServer) stickyLoop(ctx context.Context) {
 
 	var codecType encoding
-
+	
 	c := server.common
 	logctx := c.logctx
 

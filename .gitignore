@@ -11,3 +11,4 @@ debug
 .vscode/*
 bigmuddy-network-telemetry-pipeline
 *.bin
+data/*
