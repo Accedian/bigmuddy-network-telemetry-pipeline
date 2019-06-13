@@ -275,6 +275,8 @@ func (t *replayInputModule) replayInputFeederLoop() error {
 
 							if loopRTState == nil {
 								loopRTState = newRealTimeStateMsec(m.cachedDecode.GetMsgTimestamp(), t.loopBacklog)
+
+								t.logctx.Infof("Loop Mode Enabled with %s", loopRTState.String())
 							}
 
 							// The the next timestmap to use
@@ -285,9 +287,10 @@ func (t *replayInputModule) replayInputFeederLoop() error {
 								t.logctx.Infof("Replay loop as reached current time. Halting replay loop for %s before generating next sample", timeUntilNow.String())
 								time.Sleep(timeUntilNow)
 							}
-							t.logctx.Infof("UINT64 start time %s, nextTime: %s",
-								uint64time(m.cachedDecode.GetMsgTimestamp()).String(),
-								uint64time(nextTimestamp).String())
+							t.logctx.WithFields(log.Fields{
+								"Original Start Time": uint64time(m.cachedDecode.GetMsgTimestamp()).String(),
+								"NextStartTime":       uint64time(nextTimestamp).String(),
+							}).Debug("Update Time")
 
 							target := &telem.Telemetry{}
 							target.NodeId = m.cachedDecode.NodeId
