@@ -7,7 +7,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: gcr.io/npav-172917/docker-go-sdk:0.5.0-ubuntu16
+      - image: gcr.io/npav-172917/docker-go-sdk:0.16.0-ubuntu16
         auth:
           username: ${GCR_DOCKER_RO_USERNAME}
           password: ${GCR_DOCKER_RO_PASSWORD}
@@ -27,7 +27,7 @@ jobs:
 
   release:
     docker:
-      - image: gcr.io/npav-172917/docker-go-sdk:0.5.0-ubuntu16
+      - image: gcr.io/npav-172917/docker-go-sdk:0.16.0-ubuntu16
         auth:
           username: ${GCR_DOCKER_RO_USERNAME}
           password: ${GCR_DOCKER_RO_PASSWORD}
