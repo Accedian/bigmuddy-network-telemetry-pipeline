@@ -1,8 +1,10 @@
-* Feature -- Adding re-timestamping mode for loop mode, allowing contiues streaming of a static archive 
 ## Current Release 
+### 0.16.0 
+**Release Date:** Mon Jun 17 16:15:31 UTC 2019     
+## Previous Releases 
+* Feature -- Adding re-timestamping mode for loop mode, allowing contiues streaming of a static archive 
 ### 0.15.0 
 **Release Date:** Mon Dec  4 21:43:46 UTC 2017     
-## Previous Releases 
 ### Added
 * feature - added InputAcceptDataRate and OutputAcceptDataRate to the colt csv template
 
