@@ -1,3 +1,4 @@
+* Feature -- Adding re-timestamping mode for loop mode, allowing contiues streaming of a static archive 
 ## Current Release 
 ### 0.15.0 
 **Release Date:** Mon Dec  4 21:43:46 UTC 2017     
