@@ -284,7 +284,10 @@ func (t *replayInputModule) replayInputFeederLoop() error {
 
 							timeUntilNow := uint64time(nextTimestamp).Sub(time.Now())
 							if timeUntilNow > 0 {
-								t.logctx.Infof("Replay loop as reached current time. Halting replay loop for %s before generating next sample", timeUntilNow.String())
+								t.logctx.WithFields(log.Fields{
+									"now":            time.Now().String(),
+									"sleep duration": timeUntilNow.String(),
+								}).Info("Replay loop as reached current time. Halting replay loop before generating next sample")
 								time.Sleep(timeUntilNow)
 							}
 							t.logctx.WithFields(log.Fields{
