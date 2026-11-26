@@ -1,3 +1,4 @@
+* Fix - Upgrade the CircleCI configuration to version 2.1. [Asana](https://app.asana.com/1/5557457880942/project/1213352217416090/task/1220911846631997?focus=true)
 ## Current Release 
 ### 0.16.0 
 **Release Date:** Mon Jun 17 16:15:31 UTC 2019     
